@@ -7,12 +7,14 @@
     }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "bin/www"
-    }
+    { "src": "/(.*)", "dest": "bin/www" }
   ],
   "env": {
-    "PYTHON": "/usr/bin/python3"
+    "MONGODB_URI": "@sudorootec/DonutClicker-NDAP-MONGODB_URI"
+  },
+  "build": {
+    "env": {
+      "MONGODB_URI": "@sudorootec/DonutClicker-NDAP-MONGODB_URI"
+    }
   }
 }
