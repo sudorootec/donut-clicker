@@ -1,21 +1,18 @@
 const express = require("express");
 const router = express.Router();
-
-//passport
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
-
-//user model
 const User = require("../models/user");
 
-//signup
+// Signup page
 router.get("/signup", (req, res) => {
   res.render("signup", {
     title: "Inscription - Donut Clicker",
     pageClass: 'signup'
   });
 });
-//login
+
+// Login page
 router.get("/login", (req, res) => {
   res.render("login", {
     title: "Connexion - Donut Clicker",
@@ -23,85 +20,52 @@ router.get("/login", (req, res) => {
   });
 });
 
-// router.get("/profile", (req, res) => {   res.render("profile", {     title:
-// "Mon profil - Donut Clicker",     pageClass: 'profile'   }); }); when signup
-// post
-router.post("/signup", (req, res) => {
-  const username = req.body.username;
-  const email = req.body.email;
-  const password = req.body.password;
-  const password_c = req.body.password_c;
+// Signup post handler
+router.post("/signup", async (req, res, next) => {
+  try {
+    const { username, email, password, password_c } = req.body;
 
-  req
-    .checkBody("username", "Username is required")
-    .notEmpty();
-  req
-    .checkBody("username", "Username Already Exist")
-    .isUniqueUsername();
-  req
-    .checkBody("email", "Email is required")
-    .notEmpty();
-  req
-    .checkBody("email", "Email is not valid")
-    .isEmail();
-  req
-    .checkBody("email", "Email already exist")
-    .isUniqueEmail();
-  req
-    .checkBody("password", "Password is required")
-    .notEmpty();
-  req
-    .checkBody("password_c", "Passwords do not match")
-    .equals(req.body.password);
-  const result = req.getValidationResult().then(err => {
-    const errors = err.array();
-    console.log(errors);
-    if (!err.isEmpty()) {
-      res.render("signup", {
-        errors: errors
-      });
+    req.checkBody("username", "Username is required").notEmpty();
+    req.checkBody("username", "Username Already Exist").isUniqueUsername();
+    req.checkBody("email", "Email is required").notEmpty();
+    req.checkBody("email", "Email is not valid").isEmail();
+    req.checkBody("email", "Email already exists").isUniqueEmail();
+    req.checkBody("password", "Password is required").notEmpty();
+    req.checkBody("password_c", "Passwords do not match").equals(password);
+
+    const result = await req.getValidationResult();
+    if (!result.isEmpty()) {
+      const errors = result.array();
+      res.render("signup", { errors });
     } else {
-      const newUser = new User({
-        username,
-        email,
-        password
-      });
-
-      User.createUser(newUser, (err, user) => {
-        if (err)
-          throw err;
-        console.log(user);
-      });
+      const newUser = new User({ username, email, password });
+      await User.createUser(newUser);
       res.redirect("/users/login");
     }
-  });
+  } catch (err) {
+    next(err);
+  }
 });
-//use passport strategy and redefine, by default login is with username
+
+// Passport local strategy setup
 passport.use("local", new LocalStrategy({
   usernameField: "email",
   passwordField: "password"
-}, (email, password, done) => {
-  User.getUserByEmail(email, (err, user) => {
-    if (err)
-      return done(err);
+}, async (email, password, done) => {
+  try {
+    const user = await User.getUserByEmail(email);
     if (!user) {
-      return done(null, false, {
-        message: "User not found"
-      });
+      return done(null, false, { message: "User not found" });
     }
-
-    User.comparePassword(password, user.password, (err, isMatch) => {
-      if (err)
-        return done(err);
-      if (isMatch) {
-        return done(null, user);
-      } else {
-        return done(null, false, {
-          message: "Incorrect password"
-        });
-      }
-    });
-  });
+    const isMatch = await User.comparePassword(password, user.password);
+    if (isMatch) {
+      return done(null, user);
+    } else {
+      return done(null, false, { message: "Incorrect password" });
+    }
+  } catch (err) {
+    return done(err);
+  }
 }));
 
 passport.serializeUser((user, done) => {
@@ -114,18 +78,18 @@ passport.deserializeUser((id, done) => {
   });
 });
 
-//when login post
-
+// Login post handler
 router.post("/login", passport.authenticate("local", {
   successRedirect: "/",
   failureRedirect: "/users/login",
   failureFlash: true
 }));
 
-//when logout passport allows to logout with .logout()
+// Logout handler
 router.get("/logout", (req, res) => {
-  req.logOut();
+  req.logout();
   req.session.destroy();
   res.redirect("/users/login");
 });
+
 module.exports = router;
