@@ -37,7 +37,7 @@
     "socket.io": "^2.3.0"
   },
   "engines": {
-    "node": "16.x"
+    "node": "18.x"
   },
   "packageManager": "npm@8.1.0"
 }
