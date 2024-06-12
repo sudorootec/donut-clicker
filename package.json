@@ -25,7 +25,7 @@
     "moment": "^2.24.0",
     "mongoose": "^5.7.8",
     "morgan": "~1.9.1",
-    "sass": "^1.32.8",
+    "sass": "^1.77.5",
     "node-sass-middleware": "^0.11.0",
     "passport": "^0.4.0",
     "passport-auth0": "^1.2.1",
