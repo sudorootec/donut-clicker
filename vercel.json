@@ -2,20 +2,17 @@
   "version": 2,
   "builds": [
     {
-      "src": "bin/www",
+      "src": "./bin/www",
       "use": "@vercel/node"
     }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "bin/www" }
+    {
+      "src": "/(.*)",
+      "dest": "./bin/www"
+    }
   ],
   "env": {
-    "MONGODB_URI": "@sudorootec/DonutClicker-NDAP-MONGODB_URI"
-  },
-  "build": {
-    "env": {
-      "MONGODB_URI": "@sudorootec/DonutClicker-NDAP-MONGODB_URI"
-    }
+    "MONGODB_URI": "@donut_clicker_mongodb_uri"
   }
 }
- 
