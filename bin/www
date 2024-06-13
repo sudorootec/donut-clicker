@@ -7,37 +7,11 @@
 var app = require("../app").app;
 
 /**
- * Normalize a port into a number, string, or false.
- */
-
-function normalizePort(val) {
-  var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
-  return false;
-}
-
-/**
- * Get port from environment and store in Express.
- */
-
-var port = normalizePort(process.env.PORT || "3000");
-app.set("port", port);
-
-/**
  * Serverless function to handle requests.
+ * This function is compatible with Vercel's deployment model.
  */
 
 module.exports = (req, res) => {
-  const handler = app.listen(port).listeners('request')[0];
+  const handler = app.listen().listeners('request')[0];
   return handler(req, res);
 };
